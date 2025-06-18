@@ -1,56 +1,45 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Portafolio.Models;
+using Portafolio.Servicios;
 
 namespace Portafolio.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly IRepositorioProyectos repositorioProyectos;
+    private readonly ServicioDelimitado servicioDelimitado;
+    private readonly ServicioTransitorio servicioTransitorio;
+    private readonly ServicioUnico servicioUnico;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, 
+        IRepositorioProyectos repositorioProyectos,
+        ServicioDelimitado servicioDelimitado,
+        ServicioTransitorio servicioTransitorio,
+        ServicioUnico servicioUnico)
     {
         _logger = logger;
+        this.repositorioProyectos = repositorioProyectos;
+        this.servicioDelimitado = servicioDelimitado;
+        this.servicioTransitorio = servicioTransitorio;
+        this.servicioUnico = servicioUnico;
     }
 
     public IActionResult Index()
     {
-        var proyectos = ObtenerProyectos().Take(3).ToList();
-        var modelo = new HomeIndexViewModel() { Proyectos = proyectos };
-        return View(modelo);
-    }
-
-    private List<Proyecto> ObtenerProyectos()
-    {
-        return new List<Proyecto>() { new Proyecto
+        var proyectos = repositorioProyectos.ObtenerProyectos().Take(3).ToList();
+        var guidViewModel = new EjemploGUIDViewModel()
         {
-            Titulo = "Amazon",
-            Descripcion = "E-Commerce realizado en ASP .NET Core",
-            Link = "",
-            ImgURL = "/img/steam.PNG"
-        },
-        new Proyecto
-        {
-            Titulo = "Proyecto 2",
-            Descripcion = "E-Commerce realizado en ASP .NET Core",
-            Link = "",
-            ImgURL = "/img/reddit.PNG"
-        },
-        new Proyecto
-        {
-            Titulo = "Proyecto 3",
-            Descripcion = "Sistema de facturación",
-            Link = "",
-            ImgURL = "/img/nyt.PNG"
-        },
-        new Proyecto
-        {
-            Titulo = "Proyecto 4",
-            Descripcion = "Tienda en linea",
-            Link = "",
-            ImgURL = "/img/nyt.PNG"
-        },
+            Delimitado = servicioUnico.ObtenerGuid,
+            Transitorio = servicioTransitorio.ObtenerGuid,
+            Unico = servicioTransitorio.ObtenerGuid
         };
+        var modelo = new HomeIndexViewModel() { 
+            Proyectos = proyectos,
+            EjemploGUID_1 = guidViewModel
+        };
+        return View(modelo);
     }
 
     public IActionResult Privacy()
