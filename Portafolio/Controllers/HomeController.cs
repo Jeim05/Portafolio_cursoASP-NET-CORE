@@ -42,7 +42,13 @@ public class HomeController : Controller
         return View(modelo);
     }
 
-    public IActionResult Privacy()
+    public IActionResult Proyectos()
+    {
+        var proyectos = repositorioProyectos.ObtenerProyectos();
+        return View(proyectos);
+    }
+
+    public IActionResult Contacto()
     {
         return View();
     }
