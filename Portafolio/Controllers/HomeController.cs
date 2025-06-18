@@ -9,35 +9,23 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
     private readonly IRepositorioProyectos repositorioProyectos;
-    private readonly ServicioDelimitado servicioDelimitado;
-    private readonly ServicioTransitorio servicioTransitorio;
-    private readonly ServicioUnico servicioUnico;
+    private readonly IServicioEmail servicioEmail;
 
     public HomeController(ILogger<HomeController> logger, 
         IRepositorioProyectos repositorioProyectos,
-        ServicioDelimitado servicioDelimitado,
-        ServicioTransitorio servicioTransitorio,
-        ServicioUnico servicioUnico)
+        IServicioEmail servicioEmail)
     {
         _logger = logger;
         this.repositorioProyectos = repositorioProyectos;
-        this.servicioDelimitado = servicioDelimitado;
-        this.servicioTransitorio = servicioTransitorio;
-        this.servicioUnico = servicioUnico;
+        this.servicioEmail = servicioEmail;
     }
 
     public IActionResult Index()
     {
         var proyectos = repositorioProyectos.ObtenerProyectos().Take(3).ToList();
-        var guidViewModel = new EjemploGUIDViewModel()
+        var modelo = new HomeIndexViewModel()
         {
-            Delimitado = servicioUnico.ObtenerGuid,
-            Transitorio = servicioTransitorio.ObtenerGuid,
-            Unico = servicioTransitorio.ObtenerGuid
-        };
-        var modelo = new HomeIndexViewModel() { 
-            Proyectos = proyectos,
-            EjemploGUID_1 = guidViewModel
+            Proyectos = proyectos
         };
         return View(modelo);
     }
@@ -49,6 +37,18 @@ public class HomeController : Controller
     }
 
     public IActionResult Contacto()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Contacto(ContactoViewModel contactoViewModel)
+    {
+        await servicioEmail.Enviar(contactoViewModel);
+        return RedirectToAction("Gracias");
+    }
+
+    public IActionResult Gracias()
     {
         return View();
     }
